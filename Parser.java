@@ -1,15 +1,16 @@
 import java.util.ArrayList;
 
 public class Parser {
-    private Lexer lexer;
+    private ArrayList<String> tokens;
     private ArrayList<String> syntaxErrors = new ArrayList<>();
+    private int currentIndex;
     private String currentToken;
-    private int tokenIndex = 0;
 
-    public Parser(Lexer lexer) {
-        this.lexer = lexer;
-        if (!lexer.getTokenList().isEmpty()) {
-            currentToken = lexer.getTokenList().get(0);
+    public Parser(ArrayList<String> tokens) {
+        this.tokens = tokens;
+        this.currentIndex = 0;
+        if (!tokens.isEmpty()) {
+            currentToken = tokens.get(0);
         }
     }
 
@@ -31,12 +32,13 @@ public class Parser {
     }
 
     private void parseD() {
-        if (currentToken.matches("[a-zA-Z][a-zA-Z0-9]*")) {
+        while (currentToken != null && currentToken.matches("[a-zA-Z][a-zA-Z0-9]*")) {
             match(currentToken);
             if (currentToken.equals("int") || currentToken.equals("string")) {
                 match(currentToken);
                 match(";");
-                parseD();
+            } else {
+                break;
             }
         }
     }
@@ -54,6 +56,7 @@ public class Parser {
         } else if (currentToken.equals("print")) {
             match("print");
             parseE();
+            match(";");
         } else {
             syntaxErrors.add("Se esperaba 'while', 'id' o 'print', pero se encontró: " + currentToken);
         }
@@ -62,7 +65,7 @@ public class Parser {
     private void parseE() {
         if (currentToken.matches("[a-zA-Z][a-zA-Z0-9]*")) {
             match(currentToken);
-            if (currentToken.equals("+")) {
+            if (currentToken != null && currentToken.equals("+")) {
                 match("+");
                 match(currentToken);
             }
@@ -72,9 +75,10 @@ public class Parser {
     }
 
     private void match(String expected) {
-        if (currentToken.equals(expected)) {
-            if (++tokenIndex < lexer.getTokenList().size()) {
-                currentToken = lexer.getTokenList().get(tokenIndex);
+        if (currentToken != null && currentToken.equals(expected)) {
+            currentIndex++;
+            if (currentIndex < tokens.size()) {
+                currentToken = tokens.get(currentIndex);
             } else {
                 currentToken = null;
             }
