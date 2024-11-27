@@ -21,7 +21,6 @@ public class Compilador {
 
             // Realizar el análisis sintáctico
             parser.parse();
-            System.out.println("El código es válido según la gramática.");
         }
 
         scanner.close();
