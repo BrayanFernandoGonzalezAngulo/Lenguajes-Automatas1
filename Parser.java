@@ -1,89 +1,85 @@
-// Parser.java
-import javax.swing.JTextArea;
+import java.util.ArrayList;
 
 public class Parser {
     private Lexer lexer;
+    private ArrayList<String> syntaxErrors = new ArrayList<>();
     private String currentToken;
-    private JTextArea output;
+    private int tokenIndex = 0;
 
-    public Parser(Lexer lexer, JTextArea output) {
+    public Parser(Lexer lexer) {
         this.lexer = lexer;
-        this.output = output;
-        currentToken = lexer.getToken();
+        if (!lexer.getTokenList().isEmpty()) {
+            currentToken = lexer.getTokenList().get(0);
+        }
     }
 
-    public void parse() throws Exception {
+    public void parse() {
         try {
-            P();
-            if (currentToken != null) {
-                throw new Exception("Tokens sobrantes después del fin del programa: '" + currentToken + "' en posición " + lexer.getCurrentPosition());
-            }
+            parseP();
         } catch (Exception e) {
-            throw new Exception("Error en el parser: " + e.getMessage());
+            syntaxErrors.add(e.getMessage());
         }
     }
 
-    private void P() throws Exception {
-        D();
-        S();
+    public ArrayList<String> getSyntaxErrors() {
+        return syntaxErrors;
     }
 
-    private void D() throws Exception {
-        if (lexer.isIdentifier(currentToken)) {
-            currentToken = lexer.getToken();
-            if ("int".equals(currentToken) || "String".equals(currentToken)) {
-                currentToken = lexer.getToken();
-                if (lexer.isDelimiter(currentToken)) {
-                    currentToken = lexer.getToken();
-                    D();
-                } else {
-                    throw new Exception("Se esperaba un ';' en posición " + lexer.getCurrentPosition());
-                }
-            } else {
-                throw new Exception("Tipo de dato inválido en posición " + lexer.getCurrentPosition());
+    private void parseP() {
+        parseD();
+        parseS();
+    }
+
+    private void parseD() {
+        if (currentToken.matches("[a-zA-Z][a-zA-Z0-9]*")) {
+            match(currentToken);
+            if (currentToken.equals("int") || currentToken.equals("string")) {
+                match(currentToken);
+                match(";");
+                parseD();
             }
         }
     }
 
-    private void S() throws Exception {
-        if ("while".equals(currentToken)) {
-            currentToken = lexer.getToken();
-            E();
-            if ("do".equals(currentToken)) {
-                currentToken = lexer.getToken();
-                S();
-            } else {
-                throw new Exception("Se esperaba 'do' en posición " + lexer.getCurrentPosition());
-            }
-        } else if (lexer.isIdentifier(currentToken)) {
-            currentToken = lexer.getToken();
-            if ("=".equals(currentToken)) {
-                currentToken = lexer.getToken();
-                E();
-            } else {
-                throw new Exception("Se esperaba '=' en posición " + lexer.getCurrentPosition());
-            }
-        } else if ("print".equals(currentToken)) {
-            currentToken = lexer.getToken();
-            E();
+    private void parseS() {
+        if (currentToken.equals("while")) {
+            match("while");
+            parseE();
+            match("do");
+            parseS();
+        } else if (currentToken.matches("[a-zA-Z][a-zA-Z0-9]*")) {
+            match(currentToken);
+            match("=");
+            parseE();
+        } else if (currentToken.equals("print")) {
+            match("print");
+            parseE();
         } else {
-            throw new Exception("Instrucción inválida en posición " + lexer.getCurrentPosition());
+            syntaxErrors.add("Se esperaba 'while', 'id' o 'print', pero se encontró: " + currentToken);
         }
     }
 
-    private void E() throws Exception {
-        if (lexer.isIdentifier(currentToken)) {
-            currentToken = lexer.getToken();
-            if ("+".equals(currentToken)) {
-                currentToken = lexer.getToken();
-                if (lexer.isIdentifier(currentToken)) {
-                    currentToken = lexer.getToken();
-                } else {
-                    throw new Exception("Se esperaba un identificador después de '+' en posición " + lexer.getCurrentPosition());
-                }
+    private void parseE() {
+        if (currentToken.matches("[a-zA-Z][a-zA-Z0-9]*")) {
+            match(currentToken);
+            if (currentToken.equals("+")) {
+                match("+");
+                match(currentToken);
             }
         } else {
-            throw new Exception("Expresión inválida en posición " + lexer.getCurrentPosition());
+            syntaxErrors.add("Se esperaba un identificador, pero se encontró: " + currentToken);
+        }
+    }
+
+    private void match(String expected) {
+        if (currentToken.equals(expected)) {
+            if (++tokenIndex < lexer.getTokenList().size()) {
+                currentToken = lexer.getTokenList().get(tokenIndex);
+            } else {
+                currentToken = null;
+            }
+        } else {
+            syntaxErrors.add("Se esperaba '" + expected + "', pero se encontró: " + currentToken);
         }
     }
 }

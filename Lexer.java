@@ -1,58 +1,52 @@
-// Lexer.java
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class Lexer {
     private String[] tokens;
     private int index;
-    private String currentToken;
-    private int currentPosition;
-
-    private static final String[] RESERVED_WORDS = {"while", "do", "print", "int", "String"};
-    private static final String[] OPERATORS = {"=", "+"};
-    private static final String DELIMITER = ";";
+    private ArrayList<String> tokenList = new ArrayList<>();
+    private ArrayList<String> errors = new ArrayList<>();
 
     public Lexer(String code) {
         tokens = code.split("\\s+");
         index = 0;
-        currentPosition = 0;
-        currentToken = tokens.length > 0 ? tokens[0] : null;
     }
 
-    public String getToken() {
-        if (index < tokens.length) {
-            currentToken = tokens[index];
-            currentPosition = index;
-            index++;
-            return currentToken;
+    public void tokenize() {
+        while (index < tokens.length) {
+            String token = tokens[index++];
+            if (isKeyword(token) || isIdentifier(token) || isOperator(token) || isDelimiter(token)) {
+                tokenList.add(token);
+            } else {
+                reportError(token);
+            }
         }
-        return null;
     }
 
-    public String peekToken() {
-        return index < tokens.length ? tokens[index] : null;
+    private boolean isKeyword(String token) {
+        return token.equals("int") || token.equals("string") || token.equals("while") || token.equals("do") || token.equals("print");
     }
 
-    public int getCurrentPosition() {
-        return currentPosition;
+    private boolean isIdentifier(String token) {
+        return token.matches("[a-zA-Z][a-zA-Z0-9]*");
     }
 
-    public boolean isReservedWord(String token) {
-        return Arrays.asList(RESERVED_WORDS).contains(token);
+    private boolean isOperator(String token) {
+        return token.equals("+") || token.equals("=");
     }
 
-    public boolean isOperator(String token) {
-        return Arrays.asList(OPERATORS).contains(token);
+    private boolean isDelimiter(String token) {
+        return token.equals(";");
     }
 
-    public boolean isDelimiter(String token) {
-        return DELIMITER.equals(token);
+    private void reportError(String token) {
+        errors.add("Token inválido: '" + token + "'");
     }
 
-    public boolean isIdentifier(String token) {
-        return token != null && token.matches("[a-zA-Z][a-zA-Z0-9]*");
+    public ArrayList<String> getTokenList() {
+        return tokenList;
     }
 
-    public boolean isNumber(String token) {
-        return token != null && token.matches("\\d+");
+    public ArrayList<String> getErrors() {
+        return errors;
     }
 }

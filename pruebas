@@ -1,41 +1,36 @@
-Codgio valido:
-Entrada:
+Pruebas:
+----------------------------------------------------------------------------------
+
+1: Entrada Valida
 
 a3 int;
 b8 String;
 while a3 do
     b8 = a3 + b8;
 
-Salida esperada:
-Compilación exitosa.
+Salida esperada: Compilacion exitosa
 
-Codigo con errores de sintax:
-Entrada:
-a3 int
-b8 String;
-while a3 do
-    b8 = a3 + ;
+----------------------------------------------------------------------------------
 
-Salida esperada:
-Error: Se esperaba un ';' en posición 1.
+2. Error de gramatica
 
-Codigo con errores de gramatica:
-Entrada:
 a3 int;
-b8 String;
-while a3 do
-    b8 + b8;
+b8 = a3 + ;
 
-Salida esperada:
-Error: Se esperaba '=' en posición 4.
+Salida esperaba: Error: Se esperaba un identificador después de '+'.
 
-Codigo con tokens invalidos:
-Entrada:
-@3 int;
-b8 String;
+----------------------------------------------------------------------------------
 
-Salida esperada:
-Error: Token inválido '@3' en posición 0.
+3. Error de tipo de dato
 
+a3 char;
 
+Salida esperada: Error: Tipo de dato inválido
 
+----------------------------------------------------------------------------------
+
+4. Error de instrucción:
+
+3a int;
+
+Salida esperada: Error: Instrucción inválida.
