@@ -6,6 +6,7 @@ public class Compilador {
 
         // Bucle infinito para seguir procesando varios códigos
         while (true) {
+            System.out.println("********************************************************************************");
             System.out.println("Introduce el código (o 'salir' para terminar):");
             String codigo = scanner.nextLine();
 
