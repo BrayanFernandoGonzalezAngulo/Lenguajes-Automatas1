@@ -55,8 +55,6 @@ public class Parser {
 
     // Método para verificar si un token es un identificador
     private boolean isIdentifier(String token) {
-        // Implementa la lógica para verificar si un token es un identificador válido
-        // Por ejemplo, podrías verificar si el token no es una palabra clave y cumple con las reglas de un identificador
         return !keywords.contains(token) && token.matches("[a-zA-Z_][a-zA-Z0-9_]*");
     }
 
