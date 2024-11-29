@@ -71,6 +71,7 @@ public class Parser {
                     currentToken = lexer.getToken(); // Avanzar al siguiente token
                     parseE(); // Analizar la expresión
                     if (currentToken.equals(";")) {
+                        System.out.println("Asignación: " + id + " = expresión");
                         currentToken = lexer.getToken(); // Avanzar al siguiente token
                     } else {
                         error("Se esperaba ';' después de la asignación.");
@@ -82,8 +83,10 @@ public class Parser {
                 currentToken = lexer.getToken(); // Avanzar al siguiente token
                 parseE(); // Analizar la expresión
                 if (currentToken.equals("do")) {
+                    System.out.println("Inicio del bucle while con expresión");
                     currentToken = lexer.getToken(); // Avanzar al siguiente token
                     parseS(); // Analizar la sentencia
+                    System.out.println("Fin del bucle while");
                 } else {
                     error("Se esperaba 'do' después de la expresión en el while.");
                 }
@@ -91,6 +94,7 @@ public class Parser {
                 currentToken = lexer.getToken(); // Avanzar al siguiente token
                 parseE(); // Analizar la expresión
                 if (currentToken.equals(";")) {
+                    System.out.println("Instrucción print con expresión");
                     currentToken = lexer.getToken(); // Avanzar al siguiente token
                 } else {
                     error("Se esperaba ';' después de la instrucción print.");
@@ -104,6 +108,7 @@ public class Parser {
     // E -> id | num | ( E )
     private void parseE() {
         if (isIdentifier(currentToken) || isNumber(currentToken)) {
+            System.out.println("Expresión: " + currentToken);
             currentToken = lexer.getToken(); // Avanzar al siguiente token
         } else if (currentToken.equals("(")) {
             currentToken = lexer.getToken(); // Avanzar al siguiente token
