@@ -47,8 +47,17 @@ public class Parser {
                 } else {
                     error("Se esperaba ';' después de la declaración.");
                 }
+            } else if (currentToken.equals("=")) {
+                currentToken = lexer.getToken(); // Avanzar al siguiente token
+                parseE(); // Analizar la expresión
+                if (currentToken.equals(";")) {
+                    System.out.println("Asignación: " + id + " = expresión");
+                    currentToken = lexer.getToken(); // Avanzar al siguiente token
+                } else {
+                    error("Se esperaba ';' después de la asignación.");
+                }
             } else {
-                error("Se esperaba un tipo de dato (int o string) después del identificador.");
+                error("Se esperaba un tipo de dato (int o string) o una asignación después del identificador.");
             }
         }
     }
@@ -103,11 +112,20 @@ public class Parser {
         }
     }
 
-    // E -> id | num | ( E )
+    // E -> id + id | id | num | ( E )
     private void parseE() {
         if (isIdentifier(currentToken) || isNumber(currentToken)) {
             System.out.println("Expresión: " + currentToken);
             currentToken = lexer.getToken(); // Avanzar al siguiente token
+            if (currentToken.equals("+")) {
+                currentToken = lexer.getToken(); // Avanzar al siguiente token
+                if (isIdentifier(currentToken) || isNumber(currentToken)) {
+                    System.out.println("Expresión: " + currentToken);
+                    currentToken = lexer.getToken(); // Avanzar al siguiente token
+                } else {
+                    error("Se esperaba un identificador o número después de '+'.");
+                }
+            }
         } else if (currentToken.equals("(")) {
             currentToken = lexer.getToken(); // Avanzar al siguiente token
             parseE(); // Analizar la expresión
