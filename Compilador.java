@@ -23,6 +23,7 @@ public class Compilador {
             parser.parse();
         }
 
+        // Cerrar el escáner
         scanner.close();
     }
 }
