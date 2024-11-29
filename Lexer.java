@@ -1,17 +1,19 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Lexer {
     private String input;
     private int index = 0;
-    
+
     // Definir las palabras clave, tipos de datos, operadores y delimitadores
     private final String[] keywords = {"while", "do", "print", "int", "string"};
     private final String[] types = {"int", "string"};
     private final String delimitador = ";";
-    private final String operador = "=";
+    private final String[] operadores = {"=", "+"};
     private List<String> tokens = new ArrayList<>();
-    
+
     public Lexer(String input) {
         this.input = input;
     }
@@ -30,48 +32,48 @@ public class Lexer {
     // Obtener el siguiente token
     public String getToken() {
         skipWhitespace();
-        
+
         if (index >= input.length()) {
             return ""; // Fin de la entrada
         }
 
-        char currentChar = input.charAt(index);
+        String remainingInput = input.substring(index);
         
-        // Verificar si es un carácter no esperado
-        if (!Character.isLetterOrDigit(currentChar) && currentChar != '=' && currentChar != ';') {
-            System.out.println("Error: Caracter no reconocido '" + currentChar + "'");
-            index++; // Avanzar para no quedar en un loop infinito
-            return getToken(); // Intentar obtener el siguiente token
+        // Verificar operadores y delimitadores
+        for (String operador : operadores) {
+            if (remainingInput.startsWith(operador)) {
+                index += operador.length();
+                return operador;
+            }
+        }
+        if (remainingInput.startsWith(delimitador)) {
+            index += delimitador.length();
+            return delimitador;
         }
 
         // Identificar palabras clave, identificadores o números
-        if (Character.isLetter(currentChar)) {
-            String token = readIdentifier();
+        Pattern pattern = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*");
+        Matcher matcher = pattern.matcher(remainingInput);
+        if (matcher.find()) {
+            String token = matcher.group();
+            index += token.length();
             if (isKeyword(token)) {
                 return token; // Palabra clave
             }
             return token; // Identificador
         }
-        
-        // Verificar si es un número (aunque no se está usando en este ejemplo)
-        if (Character.isDigit(currentChar)) {
-            return readNumber(); // Leer un número (puedes ignorar o modificar según tus necesidades)
+
+        // Verificar si es un número
+        pattern = Pattern.compile("^\\d+");
+        matcher = pattern.matcher(remainingInput);
+        if (matcher.find()) {
+            String token = matcher.group();
+            index += token.length();
+            return token; // Número
         }
-        
-        // Verificar operadores
-        if (currentChar == '=') {
-            index++;
-            return operador; // Operador '='
-        }
-        
-        // Verificar delimitadores
-        if (currentChar == ';') {
-            index++;
-            return delimitador; // Delimitador ';'
-        }
-        
+
         // Si no es ninguno de estos, es un error
-        System.out.println("Error: Token desconocido '" + currentChar + "'");
+        System.out.println("Error: Token desconocido '" + remainingInput.charAt(0) + "'");
         index++; // Avanzar para no quedar en un loop infinito
         return getToken(); // Intentar obtener el siguiente token
     }
@@ -80,24 +82,6 @@ public class Lexer {
         while (index < input.length() && Character.isWhitespace(input.charAt(index))) {
             index++;
         }
-    }
-
-    private String readIdentifier() {
-        StringBuilder sb = new StringBuilder();
-        while (index < input.length() && (Character.isLetter(input.charAt(index)) || Character.isDigit(input.charAt(index)))) {
-            sb.append(input.charAt(index));
-            index++;
-        }
-        return sb.toString();
-    }
-
-    private String readNumber() {
-        StringBuilder sb = new StringBuilder();
-        while (index < input.length() && Character.isDigit(input.charAt(index))) {
-            sb.append(input.charAt(index));
-            index++;
-        }
-        return sb.toString();
     }
 
     private boolean isKeyword(String token) {
@@ -118,11 +102,12 @@ public class Lexer {
         }
         return false;
     }
-public List<String> getKeywords() {
-    List<String> keywordList = new ArrayList<>();
-    for (String keyword : keywords) {
-        keywordList.add(keyword);
+
+    public List<String> getKeywords() {
+        List<String> keywordList = new ArrayList<>();
+        for (String keyword : keywords) {
+            keywordList.add(keyword);
+        }
+        return keywordList;
     }
-    return keywordList;
-}
 }
