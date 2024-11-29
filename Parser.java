@@ -31,97 +31,100 @@ public class Parser {
         parseS();  // Analizar las sentencias
     }
 
-    // D -> id (int | string) ; D
+    // D -> id (int | string) ; D | ε
     private void parseD() {
-        if (currentToken.equals("")) return;
+        while (isIdentifier(currentToken)) {
+            String id = currentToken;
+            currentToken = lexer.getToken(); // Avanzar al siguiente token
 
-        if (isIdentifier(currentToken)) {
-            String identifier = currentToken;
-            currentToken = lexer.getToken();
-            if (isType(currentToken)) {
+            if (currentToken.equals("int") || currentToken.equals("string")) {
                 String type = currentToken;
-                currentToken = lexer.getToken();
+                currentToken = lexer.getToken(); // Avanzar al siguiente token
+
                 if (currentToken.equals(";")) {
-                    currentToken = lexer.getToken();
-                    System.out.println("Declaración: " + identifier + " de tipo " + type);
-                    parseD();  // Continuar con más declaraciones
+                    System.out.println("Declaración: " + id + " de tipo " + type);
+                    currentToken = lexer.getToken(); // Avanzar al siguiente token
                 } else {
                     error("Se esperaba ';' después de la declaración.");
                 }
             } else {
-                error("Se esperaba un tipo de dato (int o string), pero se encontró: " + currentToken);
+                error("Se esperaba un tipo de dato (int o string) después del identificador.");
             }
-        } else {
-            error("Se esperaba un identificador, pero se encontró: " + currentToken);
         }
     }
 
-    // S -> while E do S | id = E | print E
+    // Método para verificar si un token es un identificador
+    private boolean isIdentifier(String token) {
+        // Implementa la lógica para verificar si un token es un identificador válido
+        // Por ejemplo, podrías verificar si el token no es una palabra clave y cumple con las reglas de un identificador
+        return !keywords.contains(token) && token.matches("[a-zA-Z_][a-zA-Z0-9_]*");
+    }
+
+    // S -> id = E ; S | while E do S | print E ; S | ε
     private void parseS() {
-        if (currentToken.equals("")) return;
+        while (!currentToken.equals("") && !currentToken.equals("}")) {
+            if (isIdentifier(currentToken)) {
+                String id = currentToken;
+                currentToken = lexer.getToken(); // Avanzar al siguiente token
 
-        if (currentToken.equals("while")) {
-            currentToken = lexer.getToken();
-            parseE();  // Analizar expresión E
-            if (currentToken.equals("do")) {
-                currentToken = lexer.getToken();
-                parseS();  // Analizar sentencia dentro de while
-            } else {
-                error("Se esperaba 'do' después de 'while', pero se encontró: " + currentToken);
-            }
-        } else if (isIdentifier(currentToken)) {
-            String id = currentToken;
-            currentToken = lexer.getToken();
-            if (currentToken.equals("=")) {
-                currentToken = lexer.getToken();
-                parseE();  // Analizar expresión E
-                System.out.println("Asignación: " + id + " = " + currentToken);
-            } else {
-                error("Se esperaba '=' para la asignación, pero se encontró: " + currentToken);
-            }
-        } else if (currentToken.equals("print")) {
-            currentToken = lexer.getToken();
-            parseE();  // Analizar expresión E
-            System.out.println("Impresión de: " + currentToken);
-        } else {
-            error("Sentencia no válida, token encontrado: " + currentToken);
-        }
-    }
-
-    // E -> id + id | id
-    private void parseE() {
-        if (isIdentifier(currentToken)) {
-            String id1 = currentToken;
-            currentToken = lexer.getToken();
-            if (currentToken.equals("+")) {
-                currentToken = lexer.getToken();
-                if (isIdentifier(currentToken)) {
-                    String id2 = currentToken;
-                    currentToken = lexer.getToken();
-                    System.out.println("Expresión: " + id1 + " + " + id2);
+                if (currentToken.equals("=")) {
+                    currentToken = lexer.getToken(); // Avanzar al siguiente token
+                    parseE(); // Analizar la expresión
+                    if (currentToken.equals(";")) {
+                        currentToken = lexer.getToken(); // Avanzar al siguiente token
+                    } else {
+                        error("Se esperaba ';' después de la asignación.");
+                    }
                 } else {
-                    error("Se esperaba un identificador después de '+', pero se encontró: " + currentToken);
+                    error("Se esperaba '=' después del identificador.");
+                }
+            } else if (currentToken.equals("while")) {
+                currentToken = lexer.getToken(); // Avanzar al siguiente token
+                parseE(); // Analizar la expresión
+                if (currentToken.equals("do")) {
+                    currentToken = lexer.getToken(); // Avanzar al siguiente token
+                    parseS(); // Analizar la sentencia
+                } else {
+                    error("Se esperaba 'do' después de la expresión en el while.");
+                }
+            } else if (currentToken.equals("print")) {
+                currentToken = lexer.getToken(); // Avanzar al siguiente token
+                parseE(); // Analizar la expresión
+                if (currentToken.equals(";")) {
+                    currentToken = lexer.getToken(); // Avanzar al siguiente token
+                } else {
+                    error("Se esperaba ';' después de la instrucción print.");
                 }
             } else {
-                System.out.println("Expresión: " + id1);
+                error("Se esperaba una sentencia válida.");
             }
-        } else {
-            error("Se esperaba un identificador en la expresión, pero se encontró: " + currentToken);
         }
     }
 
-    // Verificar si es un identificador
-    private boolean isIdentifier(String token) {
-        return token != null && token.matches("[a-zA-Z][a-zA-Z0-9]*") && !keywords.contains(token);
+    // E -> id | num | ( E )
+    private void parseE() {
+        if (isIdentifier(currentToken) || isNumber(currentToken)) {
+            currentToken = lexer.getToken(); // Avanzar al siguiente token
+        } else if (currentToken.equals("(")) {
+            currentToken = lexer.getToken(); // Avanzar al siguiente token
+            parseE(); // Analizar la expresión
+            if (currentToken.equals(")")) {
+                currentToken = lexer.getToken(); // Avanzar al siguiente token
+            } else {
+                error("Se esperaba ')' después de la expresión.");
+            }
+        } else {
+            error("Se esperaba una expresión válida.");
+        }
     }
 
-    // Verificar si es un tipo de dato (int o string)
-    private boolean isType(String token) {
-        return token != null && (token.equals("int") || token.equals("string"));
+    // Método para verificar si un token es un número
+    private boolean isNumber(String token) {
+        return token.matches("\\d+");
     }
 
-    // Método para mostrar errores
-    private void error(String mensaje) {
-        throw new RuntimeException("Error de sintaxis: " + mensaje);
+    // Método para manejar errores
+    private void error(String message) {
+        throw new RuntimeException("Error de sintaxis: " + message + " Se encontró: " + currentToken);
     }
 }
