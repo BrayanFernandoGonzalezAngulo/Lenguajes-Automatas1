@@ -1,9 +1,13 @@
+import java.util.List;
+
 public class Parser {
     private Lexer lexer;
     private String currentToken;
-    
+    private List<String> keywords;
+
     public Parser(Lexer lexer) {
         this.lexer = lexer;
+        this.keywords = lexer.getKeywords(); // Obtener las keywords del lexer
         this.currentToken = lexer.getToken();
     }
 
@@ -13,8 +17,7 @@ public class Parser {
             parseP();
             if (!currentToken.equals("")) {
                 error("Código adicional no esperado.");
-            }
-            else {
+            } else {
                 System.out.println("El código es válido según la gramática.");
             }
         } catch (Exception e) {
@@ -31,7 +34,7 @@ public class Parser {
     // D -> id (int | string) ; D
     private void parseD() {
         if (currentToken.equals("")) return;
-    
+
         if (isIdentifier(currentToken)) {
             String identifier = currentToken;
             currentToken = lexer.getToken();
@@ -52,7 +55,6 @@ public class Parser {
             error("Se esperaba un identificador, pero se encontró: " + currentToken);
         }
     }
-    
 
     // S -> while E do S | id = E | print E
     private void parseS() {
@@ -107,11 +109,10 @@ public class Parser {
             error("Se esperaba un identificador en la expresión, pero se encontró: " + currentToken);
         }
     }
-    
 
     // Verificar si es un identificador
     private boolean isIdentifier(String token) {
-        return token != null && token.matches("[a-zA-Z][a-zA-Z0-9]*");
+        return token != null && token.matches("[a-zA-Z][a-zA-Z0-9]*") && !keywords.contains(token);
     }
 
     // Verificar si es un tipo de dato (int o string)

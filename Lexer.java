@@ -71,8 +71,9 @@ public class Lexer {
         }
         
         // Si no es ninguno de estos, es un error
-        System.out.println("Error: Token desconocido.");
-        return ""; // Devolver vacío o manejarlo según sea necesario
+        System.out.println("Error: Token desconocido '" + currentChar + "'");
+        index++; // Avanzar para no quedar en un loop infinito
+        return getToken(); // Intentar obtener el siguiente token
     }
 
     private void skipWhitespace() {
@@ -117,12 +118,11 @@ public class Lexer {
         }
         return false;
     }
-
-    public static void main(String[] args) {
-        Lexer lexer = new Lexer("int x = 10; print x;");
-        List<String> tokens = lexer.getTokens();
-        for (String token : tokens) {
-            System.out.println(token);
-        }
+public List<String> getKeywords() {
+    List<String> keywordList = new ArrayList<>();
+    for (String keyword : keywords) {
+        keywordList.add(keyword);
     }
+    return keywordList;
+}
 }

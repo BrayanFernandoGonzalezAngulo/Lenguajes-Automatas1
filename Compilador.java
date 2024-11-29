@@ -1,7 +1,7 @@
 import java.util.Scanner;
 
 public class Compilador {
-    public static void main(String[] args) {
+    public static void main(String[] args) {	
         Scanner scanner = new Scanner(System.in);
 
         // Bucle infinito para seguir procesando varios códigos
@@ -14,7 +14,7 @@ public class Compilador {
                 System.out.println("Saliendo del compilador.");
                 break;
             }
-
+            
             // Crear un objeto Lexer y Parser
             Lexer lexer = new Lexer(codigo);
             Parser parser = new Parser(lexer);
